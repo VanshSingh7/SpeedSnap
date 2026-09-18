@@ -1,43 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SpeedSnap</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SpeedSnap — Cloudflare-style Internet Speed and Network Quality Test">
+    <title>SpeedSnap — Internet Speed Test</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="navbar">
+        <div class="brand">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+          <span class="brand-title">SpeedSnap</span>
+        </div>
+        <div class="brand-tag">Realtime Network Diagnostics</div>
+      </header>
 
-  <main class="card">
-    <h1>SpeedSnap</h1>
-    <p class="tagline">Speed is only half the story.</p>
+      <main class="main-content">
+        <div class="title-heading">
+          <h1>Your Internet Speed</h1>
+        </div>
 
-    <div class="primary-stats">
-      <div class="stat-block">
-        <span class="stat-value" id="downloadValue">--</span>
-        <span class="stat-unit">Mbps down</span>
-      </div>
-      <div class="stat-block">
-        <span class="stat-value" id="uploadValue">--</span>
-        <span class="stat-unit">Mbps up</span>
-      </div>
-    </div>
+        <section class="metrics-grid">
+          <div class="metric-column download-column">
+            <div class="metric-header">
+              <span class="metric-label">Download <span class="info-icon">ⓘ</span></span>
+              <div class="metric-value-row">
+                <span id="downloadSpeed" class="primary-number">0.0</span>
+                <span class="metric-unit">Mbps</span>
+              </div>
+            </div>
+            <div class="canvas-container">
+              <div class="percentile-indicator">90th percentile</div>
+              <canvas id="downloadCanvas"></canvas>
+            </div>
+          </div>
 
-    <canvas id="graph" width="480" height="80"></canvas>
+          <div class="metric-column upload-column">
+            <div class="metric-header">
+              <span class="metric-label">Upload <span class="info-icon">ⓘ</span></span>
+              <div class="metric-value-row">
+                <span id="uploadSpeed" class="primary-number">0.0</span>
+                <span class="metric-unit">Mbps</span>
+              </div>
+            </div>
+            <div class="canvas-container">
+              <div class="percentile-indicator">90th percentile</div>
+              <canvas id="uploadCanvas"></canvas>
+            </div>
+          </div>
 
-    <div class="secondary-stats">
-      <div><span class="label">Ping</span><span id="pingValue">--</span></div>
-      <div><span class="label">Jitter</span><span id="jitterValue">--</span></div>
-      <div><span class="label">Bufferbloat</span><span id="bufferbloatValue">--</span></div>
-      <div><span class="label">Stability</span><span id="stabilityValue">--</span></div>
-    </div>
+          <div class="stats-column">
+            <div class="stat-card">
+              <span class="stat-label">Latency <span class="info-icon">ⓘ</span></span>
+              <div class="stat-value-row">
+                <span id="latencyValue">—</span>
+                <span class="stat-unit">ms</span>
+              </div>
+              <div class="stat-range-row">
+                <span id="latencyMin">↓ — ms</span>
+                <span id="latencyMax">↑ — ms</span>
+              </div>
+            </div>
 
-    <p class="translation" id="translationValue"></p>
+            <div class="stat-card">
+              <span class="stat-label">Jitter <span class="info-icon">ⓘ</span></span>
+              <div class="stat-value-row">
+                <span id="jitterValue">—</span>
+                <span class="stat-unit">ms</span>
+              </div>
+              <div class="stat-range-row">
+                <span id="jitterMin">↓ — ms</span>
+                <span id="jitterMax">↑ — ms</span>
+              </div>
+            </div>
 
-    <button id="startBtn">Start Test</button>
-    <p class="status" id="statusValue">Ready</p>
-  </main>
+            <div class="stat-card">
+              <span class="stat-label">Packet Loss <span class="info-icon">ⓘ</span></span>
+              <div class="stat-value-row">
+                <span id="packetLossValue">0.0</span>
+                <span class="stat-unit">%</span>
+              </div>
+              <div class="stat-range-row">
+                <span id="bufferbloatSummary">Bufferbloat: —</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
-  <script src="script.js"></script>
-</body>
+        <section class="control-panel">
+          <div class="button-group">
+            <button id="startButton" class="action-button primary-action">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              Start Test
+            </button>
+            <button id="stopButton" class="action-button secondary-action" disabled>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <rect x="6" y="6" width="12" height="12"/>
+              </svg>
+              Stop
+            </button>
+            <div class="status-indicator">
+              <span id="statusPulseDot" class="pulse-dot"></span>
+              <span id="statusPhaseText">Ready to start</span>
+            </div>
+          </div>
+        </section>
+    <script src="script.js"></script>
+  </body>
 </html>
