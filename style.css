@@ -1,0 +1,264 @@
+:root {
+  --background-color: #121212;
+  --card-background: #181818;
+  --panel-background: #151515;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --text-primary: #ffffff;
+  --text-muted: #8e8e93;
+  --text-dim: #555555;
+  --accent-orange: #f6821f;
+  --accent-purple: #b877f7;
+  --accent-blue: #3b82f6;
+  --accent-green: #22c55e;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 24px 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 1220px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
+}
+
+.brand-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.brand-tag {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.title-heading h1 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: #ffffff;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 220px;
+  gap: 24px;
+  align-items: start;
+}
+
+.metric-column {
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metric-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metric-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.info-icon {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  cursor: default;
+}
+
+.metric-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.primary-number {
+  font-size: clamp(2.5rem, 4vw, 3.6rem);
+  font-weight: 800;
+  font-feature-settings: "tnum";
+  letter-spacing: -1.5px;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.metric-unit {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.canvas-container {
+  width: 100%;
+  height: 120px;
+  position: relative;
+  margin-top: 8px;
+}
+
+.percentile-indicator {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 0.3px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.stats-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 2px;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.stat-value-row span:first-child {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-feature-settings: "tnum";
+}
+
+.stat-unit {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.stat-range-row {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  display: flex;
+  gap: 10px;
+}
+
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+
+
+.button-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-button {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background-color: #222222;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease-in-out;
+}
+
+.action-button:hover:not(:disabled) {
+  background-color: #2d2d2d;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.action-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.primary-action {
+  background-color: #2a2a2a;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.primary-action:hover:not(:disabled) {
+  background-color: #363636;
+}
