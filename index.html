@@ -1,22 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpeedSnap</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Speed Test</h1>
-  <div id="status">Ready</div>
-  <button id="startBtn">Start Test</button>
 
-  <h2 id="speedValue">--</h2>
-  <div id="bufferbloatGrade"></div>
-  <div id="stabilityScore"></div>
-  <div id="translation"></div>
-  <div id="results"></div>
+  <main class="card">
+    <h1>SpeedSnap</h1>
+    <p class="tagline">Speed is only half the story.</p>
 
-  <script src="config.js"></script>
-  <script src="metrics.js"></script>
-  <script src="charts.js"></script>
+    <div class="primary-stats">
+      <div class="stat-block">
+        <span class="stat-value" id="downloadValue">--</span>
+        <span class="stat-unit">Mbps down</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-value" id="uploadValue">--</span>
+        <span class="stat-unit">Mbps up</span>
+      </div>
+    </div>
+
+    <canvas id="graph" width="480" height="80"></canvas>
+
+    <div class="secondary-stats">
+      <div><span class="label">Ping</span><span id="pingValue">--</span></div>
+      <div><span class="label">Jitter</span><span id="jitterValue">--</span></div>
+      <div><span class="label">Bufferbloat</span><span id="bufferbloatValue">--</span></div>
+      <div><span class="label">Stability</span><span id="stabilityValue">--</span></div>
+    </div>
+
+    <p class="translation" id="translationValue"></p>
+
+    <button id="startBtn">Start Test</button>
+    <p class="status" id="statusValue">Ready</p>
+  </main>
+
   <script src="script.js"></script>
 </body>
 </html>
