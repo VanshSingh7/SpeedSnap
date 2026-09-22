@@ -16,11 +16,18 @@ function calcJitter(samples) {
   return Number((sum / (samples.length - 1)).toFixed(1));
 }
 
+async function runDownload(bytes, signal) {
+  const start = performance.now();
+  const res = await fetch(${SPEEDSNAP_CONFIG.endpoints.download}?bytes=&t=, { cache: 'no-store', signal });
+  const blob = await res.blob();
+  return Number(((blob.size * 8) / ((performance.now() - start) / 1000 * 1e6)).toFixed(1));
+}
+
 self.onmessage = async (e) => {
   if (e.data === 'start') {
     abortController = new AbortController();
     const signal = abortController.signal;
-    const pings = [];
+    const pings = [], downRates = [];
     try {
       for (let i = 0; i < SPEEDSNAP_CONFIG.latency.probeCount; i++) {
         const ping = await measurePing(signal);
@@ -32,6 +39,12 @@ self.onmessage = async (e) => {
       const median = sorted[Math.floor(sorted.length / 2)];
       const jitter = calcJitter(pings);
       self.postMessage({ type: 'latencyFinal', latency: median, latencyMin: sorted[0], latencyMax: sorted[sorted.length - 1], jitter, jitterMin: 0, jitterMax: jitter * 1.5, packetLoss: 0 });
+
+      for (let i = 0; i < SPEEDSNAP_CONFIG.downloadTests.length; i++) {
+        const mbps = await runDownload(SPEEDSNAP_CONFIG.downloadTests[i].bytes, signal);
+        downRates.push(mbps);
+        self.postMessage({ type: 'downloadUpdate', speed: mbps, progress: 20 + ((i + 1) / SPEEDSNAP_CONFIG.downloadTests.length) * 40 });
+      }
     } catch (err) {}
   } else if (e.data === 'stop' && abortController) {
     abortController.abort();
