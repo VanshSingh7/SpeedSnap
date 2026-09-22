@@ -90,6 +90,67 @@ const runPingTest = async abortSignal => {
   };
 };
 
+// run download test with increasing payload sizes and concurrent pings
+const runDownloadTest = async abortSignal => {
+  const { downloadTests } = SPEEDSNAP_CONFIG;
+  const speedSamples = [];
+  const loadedPingSamples = [];
+
+  for (let i = 0; i < downloadTests.length; i++) {
+    if (abortSignal.aborted) break;
+    const test = downloadTests[i];
+
+    // measure loaded latency concurrently during download transfer
+    const pingPromise = (async () => {
+      try {
+        await sleep(50);
+        if (!abortSignal.aborted) {
+          const rtt = await measurePing(abortSignal);
+          loadedPingSamples.push(Number(rtt.toFixed(1)));
+        }
+      } catch (error) {
+        // probe dropped under heavy load
+      }
+    })();
+
+    const startTime = performance.now();
+    const url = `${SPEEDSNAP_CONFIG.endpoints.download}?bytes=${test.bytes}&cacheBust=${Math.random()}`;
+    const response = await fetch(url, {
+      cache: 'no-store',
+      signal: abortSignal
+    });
+    await response.arrayBuffer();
+    const durationSec = (performance.now() - startTime) / 1000;
+
+    await pingPromise;
+
+    // calculate speed in Mbps
+    const speedMbps = Number(((test.bytes * 8) / (durationSec * 1e6)).toFixed(1));
+    speedSamples.push(speedMbps);
+
+    // progress covers 20% to 60%
+    const progress = 20 + ((i + 1) / downloadTests.length) * 40;
+
+    self.postMessage({
+      type: 'downloadUpdate',
+      speed: speedMbps,
+      progress,
+      statusText: `Testing Download · ${test.label} (${i + 1}/${downloadTests.length})`
+    });
+  }
+
+  // 90th percentile download throughput
+  const sorted = [...speedSamples].sort((a, b) => a - b);
+  const p90Index = Math.min(sorted.length - 1, Math.floor(sorted.length * 0.9));
+  const p90Speed = sorted[p90Index] || 0;
+
+  return {
+    speed: p90Speed,
+    samples: speedSamples,
+    loadedPings: loadedPingSamples
+  };
+};
+
 // worker message handler
 self.onmessage = async event => {
   if (event.data === 'stop') {
@@ -108,6 +169,14 @@ self.onmessage = async event => {
       self.postMessage({
         type: 'latencyFinal',
         ...latencyStats
+      });
+
+      self.postMessage({ type: 'statusUpdate', statusText: 'Testing Download Speed' });
+      const downloadStats = await runDownloadTest(abortSignal);
+
+      self.postMessage({
+        type: 'downloadFinal',
+        ...downloadStats
       });
     } catch (error) {
       if (!abortSignal.aborted) {
