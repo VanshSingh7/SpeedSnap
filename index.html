@@ -135,9 +135,84 @@
             </div>
           </div>
         </section>
+
+        <section class="diagnostics-grid">
+          <div class="diagnostics-column">
+            <div class="panel-box">
+              <div class="panel-header">
+                <h3>Latency Measurements <span class="info-icon">ⓘ</span></h3>
+              </div>
+              <div class="graph-card">
+                <div class="graph-card-title">
+                  <span>Unloaded latency</span>
+                  <span id="detailUnloadedLatency" class="graph-card-val">—</span>
+                </div>
+                <div class="plot-container">
+                  <canvas id="unloadedLatencyCanvas"></canvas>
+                </div>
+              </div>
+              <div class="graph-card">
+                <div class="graph-card-title">
+                  <span>Latency during download (Bufferbloat)</span>
+                  <span id="detailDownloadLatency" class="graph-card-val">—</span>
+                </div>
+                <div class="plot-container">
+                  <canvas id="downloadLatencyCanvas"></canvas>
+                </div>
+              </div>
+              <div class="graph-card">
+                <div class="graph-card-title">
+                  <span>Latency during upload</span>
+                  <span id="detailUploadLatency" class="graph-card-val">—</span>
+                </div>
+                <div class="plot-container">
+                  <canvas id="uploadLatencyCanvas"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="diagnostics-column">
+            <div class="panel-box">
+              <div class="panel-header">
+                <h3>Packet Loss Measurements <span class="info-icon">ⓘ</span></h3>
+              </div>
+              <div class="graph-card">
+                <div class="graph-card-title">
+                  <span>Packet Loss Test</span>
+                  <span id="detailPacketLossText" class="graph-card-val">0.0%</span>
+                </div>
+                <div id="packetLossMeterBar" class="loss-meter-bar"></div>
+              </div>
+            </div>
+
+            <div class="panel-box">
+              <div class="panel-header">
+                <h3>Speed Summary <span class="info-icon">ⓘ</span></h3>
+              </div>
+              <div class="data-row">
+                <span class="row-label">Download 90th percentile</span>
+                <span id="detailDownloadSpeed" class="row-value">—</span>
+              </div>
+              <div class="data-row">
+                <span class="row-label">Upload 90th percentile</span>
+                <span id="detailUploadSpeed" class="row-value">—</span>
+              </div>
+              <div class="data-row">
+                <span class="row-label">Packet Loss</span>
+                <span id="detailPacketLoss" class="row-value">—</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="app-footer">
+          <div>SpeedSnap · High Precision Browser Speed Test</div>
+        </footer>
       </main>
     </div>
     <script src="js/config.js"></script>
+    <script src="js/charts.js"></script>
     <script src="js/script.js"></script>
   </body>
 </html>
