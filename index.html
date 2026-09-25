@@ -19,7 +19,22 @@
           </svg>
           <span class="brand-title">SpeedSnap</span>
         </div>
-        <div class="brand-tag">Realtime Network Diagnostics</div>
+        <nav class="nav-links">
+          <a href="index.html" class="nav-link active">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <span>Speed Test</span>
+          </a>
+          <a href="history.html" class="nav-link">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>History</span>
+            <span id="navHistoryCount" class="nav-count-badge">0</span>
+          </a>
+        </nav>
       </header>
 
       <main class="main-content">
@@ -30,35 +45,33 @@
         <section class="metrics-grid">
           <div class="metric-column download-column">
             <div class="metric-header">
-              <span class="metric-label">Download <span class="info-icon">ⓘ</span></span>
+              <span class="metric-label">Download</span>
               <div class="metric-value-row">
                 <span id="downloadSpeed" class="primary-number">0.0</span>
                 <span class="metric-unit">Mbps</span>
               </div>
             </div>
             <div class="canvas-container">
-              <div class="percentile-indicator">90th percentile</div>
               <canvas id="downloadCanvas"></canvas>
             </div>
           </div>
 
           <div class="metric-column upload-column">
             <div class="metric-header">
-              <span class="metric-label">Upload <span class="info-icon">ⓘ</span></span>
+              <span class="metric-label">Upload</span>
               <div class="metric-value-row">
                 <span id="uploadSpeed" class="primary-number">0.0</span>
                 <span class="metric-unit">Mbps</span>
               </div>
             </div>
             <div class="canvas-container">
-              <div class="percentile-indicator">90th percentile</div>
               <canvas id="uploadCanvas"></canvas>
             </div>
           </div>
 
           <div class="stats-column">
             <div class="stat-card">
-              <span class="stat-label">Latency <span class="info-icon">ⓘ</span></span>
+              <span class="stat-label">Latency</span>
               <div class="stat-value-row">
                 <span id="latencyValue">—</span>
                 <span class="stat-unit">ms</span>
@@ -70,7 +83,7 @@
             </div>
 
             <div class="stat-card">
-              <span class="stat-label">Jitter <span class="info-icon">ⓘ</span></span>
+              <span class="stat-label">Jitter</span>
               <div class="stat-value-row">
                 <span id="jitterValue">—</span>
                 <span class="stat-unit">ms</span>
@@ -82,7 +95,7 @@
             </div>
 
             <div class="stat-card">
-              <span class="stat-label">Packet Loss <span class="info-icon">ⓘ</span></span>
+              <span class="stat-label">Packet Loss</span>
               <div class="stat-value-row">
                 <span id="packetLossValue">0.0</span>
                 <span class="stat-unit">%</span>
@@ -108,13 +121,74 @@
               </svg>
               Stop
             </button>
+            <button id="aiSuggestButton" class="action-button ai-suggest-btn" title="Get AI network suggestions">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/>
+              </svg>
+              <span>AI Suggest</span>
+            </button>
             <div class="status-indicator">
               <span id="statusPulseDot" class="pulse-dot"></span>
               <span id="statusPhaseText">Ready to start</span>
             </div>
           </div>
+          <div id="chevronProgressBar" class="chevron-progress-bar"></div>
+          <div class="chevron-legend">
+            <span class="legend-item"><span class="legend-dot dot-blue"></span> Latency</span>
+            <span class="legend-item"><span class="legend-dot dot-yellow"></span> Download</span>
+            <span class="legend-item"><span class="legend-dot dot-purple"></span> Upload</span>
+            <span class="legend-item"><span class="legend-dot dot-red"></span> Packet Loss</span>
+          </div>
         </section>
+
+        <section class="quality-score-panel">
+          <div class="quality-header">
+            <span class="quality-title">Network Quality Score</span>
+          </div>
+          <div class="quality-badges-row">
+            <div class="quality-item">
+              <span class="quality-name">Streaming:</span>
+              <span id="streamingBadge" class="quality-badge badge-idle">—</span>
+            </div>
+            <div class="quality-item">
+              <span class="quality-name">Gaming:</span>
+              <span id="gamingBadge" class="quality-badge badge-idle">—</span>
+            </div>
+            <div class="quality-item">
+              <span class="quality-name">Video Calls:</span>
+              <span id="videoChatBadge" class="quality-badge badge-idle">—</span>
+            </div>
+          </div>
+        </section>
+
+        <footer class="app-footer">
+          <div>SpeedSnap · High Precision Browser Speed Test</div>
+        </footer>
+      </main>
+    </div>
+
+    <!-- AI Diagnostic Modal -->
+    <div id="aiModalBackdrop" class="ai-modal-backdrop">
+      <div class="ai-modal-card">
+        <div class="ai-modal-header">
+          <div>
+            <div class="ai-modal-title">Network Suggestions</div>
+            <div class="ai-modal-subtitle">AI analysis based on your test results</div>
+          </div>
+          <div class="ai-modal-actions">
+            <button id="copyAiAdviceBtn" class="ai-action-btn">Copy</button>
+            <button id="closeAiModalBtn" class="ai-close-btn">&times;</button>
+          </div>
+        </div>
+        <div id="aiTelemetryStrip" class="ai-metrics-snapshot"></div>
+        <div id="aiModalContent" class="ai-modal-content"></div>
+      </div>
+    </div>
+
     <script src="js/config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/gemini.js"></script>
+    <script src="js/charts.js"></script>
     <script src="js/script.js"></script>
   </body>
 </html>
