@@ -1,219 +1,97 @@
-const getElement = id => document.getElementById(id);
+// SpeedSnap - Main Controller (CSE Sem 5 Project)
+const getEl = id => document.getElementById(id);
+const TOTAL_CHEVRONS = 56, chevronBar = getEl('chevronProgressBar');
+let worker = null, lastFilled = 0, latestResult = null, downPoints = [], upPoints = [];
 
-const downloadSpeedElement = getElement('downloadSpeed');
-const uploadSpeedElement = getElement('uploadSpeed');
-const latencyValueElement = getElement('latencyValue');
-const latencyMinElement = getElement('latencyMin');
-const latencyMaxElement = getElement('latencyMax');
-const jitterValueElement = getElement('jitterValue');
-const jitterMinElement = getElement('jitterMin');
-const jitterMaxElement = getElement('jitterMax');
-const packetLossValueElement = getElement('packetLossValue');
-const bufferbloatSummaryElement = getElement('bufferbloatSummary');
-
-const startButton = getElement('startButton');
-const stopButton = getElement('stopButton');
-const statusPulseDot = getElement('statusPulseDot');
-const statusPhaseText = getElement('statusPhaseText');
-const chevronProgressBar = getElement('chevronProgressBar');
-
-
-const downloadCanvas = getElement('downloadCanvas');
-const uploadCanvas = getElement('uploadCanvas');
-
-
-let downloadDataPoints = [];
-let uploadDataPoints = [];
-
-let speedTestWorker = null;
-
-const TOTAL_CHEVRON_SEGMENTS = 48;
-if (chevronProgressBar) {
-  for (let i = 0; i < TOTAL_CHEVRON_SEGMENTS; i++) {
-    const segment = document.createElement('div');
-    segment.className = 'chevron-segment';
-    chevronProgressBar.appendChild(segment);
+// Initialize 56 chevron segments
+if (chevronBar) {
+  chevronBar.innerHTML = '';
+  for (let i = 0; i < TOTAL_CHEVRONS; i++) {
+    const s = document.createElement('div');
+    s.className = 'chevron-segment';
+    chevronBar.appendChild(s);
   }
 }
 
-const updateChevronProgress = progressPercentage => {
-  if (!chevronProgressBar) return;
-  const filledCount = Math.round((progressPercentage / 100) * TOTAL_CHEVRON_SEGMENTS);
-  const segments = chevronProgressBar.children;
+// Update colored chevron progress bar
+function updateProgress(pct, phase = 'latency') {
+  if (!chevronBar) return;
+  const target = Math.min(TOTAL_CHEVRONS, Math.round((pct / 100) * TOTAL_CHEVRONS));
+  const color = phase === 'download' ? 'segment-yellow' : phase === 'upload' ? 'segment-purple' : phase === 'loss' ? 'segment-red' : 'segment-blue';
+  for (let i = lastFilled; i < target; i++) if (chevronBar.children[i]) chevronBar.children[i].className = `chevron-segment ${color}`;
+  if (target > lastFilled) lastFilled = target;
+}
 
-  for (let i = 0; i < TOTAL_CHEVRON_SEGMENTS; i++) {
-    if (i < filledCount) {
-      if (i < Math.round(TOTAL_CHEVRON_SEGMENTS * 0.2)) {
-        segments[i].className = 'chevron-segment segment-blue';
-      } else if (i < Math.round(TOTAL_CHEVRON_SEGMENTS * 0.6)) {
-        segments[i].className = 'chevron-segment segment-orange';
-      } else {
-        segments[i].className = 'chevron-segment segment-purple';
+// Reset metric displays and charts
+function resetUI() {
+  lastFilled = 0; downPoints = []; upPoints = [];
+  if (chevronBar) for (let c of chevronBar.children) c.className = 'chevron-segment';
+  ['downloadSpeed', 'uploadSpeed'].forEach(id => getEl(id).textContent = '0.0');
+  ['latencyValue', 'jitterValue', 'latencyMin', 'latencyMax', 'jitterMin', 'jitterMax'].forEach(id => getEl(id).textContent = '—');
+  getEl('bufferbloatSummary').textContent = 'Bufferbloat: —';
+  ['streamingBadge', 'gamingBadge', 'videoChatBadge'].forEach(id => { const el = getEl(id); if (el) { el.textContent = '—'; el.className = 'quality-badge badge-idle'; } });
+}
+
+// Start test benchmark
+getEl('startButton').onclick = () => {
+  resetUI();
+  getEl('startButton').disabled = true;
+  getEl('stopButton').disabled = false;
+  getEl('statusPulseDot').classList.add('active');
+
+  worker = new Worker('js/worker.js');
+  worker.postMessage('start');
+
+  worker.onmessage = (e) => {
+    const d = e.data;
+    if (d.progress !== undefined) updateProgress(d.progress, d.phase);
+    if (d.statusText) getEl('statusPhaseText').textContent = d.statusText;
+
+    if (d.type === 'pingUpdate') {
+      getEl('latencyValue').textContent = d.rtt.toFixed(1);
+      if (d.jitter !== undefined) getEl('jitterValue').textContent = d.jitter.toFixed(1);
+    } else if (d.type === 'latencyFinal') {
+      getEl('latencyValue').textContent = d.latency.toFixed(1);
+      getEl('latencyMin').textContent = `↓ ${d.latencyMin} ms`;
+      getEl('latencyMax').textContent = `↑ ${d.latencyMax} ms`;
+      getEl('jitterValue').textContent = d.jitter.toFixed(1);
+    } else if (d.type === 'downloadUpdate') {
+      getEl('downloadSpeed').textContent = d.speed.toFixed(1);
+      downPoints.push(d.speed);
+      SpeedSnapCharts.drawSpeedChart(getEl('downloadCanvas'), downPoints, '#f6821f', 'rgba(246,130,31,0.25)');
+    } else if (d.type === 'bufferbloatUpdate') {
+      getEl('bufferbloatSummary').textContent = `Bufferbloat: ${d.bufferbloat}`;
+    } else if (d.type === 'uploadUpdate') {
+      getEl('uploadSpeed').textContent = d.speed.toFixed(1);
+      upPoints.push(d.speed);
+      SpeedSnapCharts.drawSpeedChart(getEl('uploadCanvas'), upPoints, '#b877f7', 'rgba(184,119,247,0.25)');
+    } else if (d.type === 'testComplete') {
+      getEl('startButton').disabled = false;
+      getEl('stopButton').disabled = true;
+      getEl('statusPulseDot').classList.remove('active');
+      getEl('statusPhaseText').textContent = 'Completed';
+      updateProgress(100);
+      latestResult = { downloadSpeed: d.download, uploadSpeed: d.upload, latency: d.latency, jitter: d.jitter, bufferbloat: `+${d.bufferbloat} ms` };
+      SpeedSnapDB.saveResult(latestResult).then(updateNav);
+      if (d.ratings) {
+        ['streaming', 'gaming', 'videoChat'].forEach(k => { const el = getEl(k + 'Badge'); if (el) { el.textContent = d.ratings[k]; el.className = 'quality-badge badge-great'; } });
       }
-    } else {
-      segments[i].className = 'chevron-segment';
-    }
-  }
-};
-
-const resetInterfaceState = () => {
-  downloadSpeedElement.textContent = '0.0';
-  uploadSpeedElement.textContent = '0.0';
-  latencyValueElement.textContent = '—';
-  latencyMinElement.textContent = '↓ — ms';
-  latencyMaxElement.textContent = '↑ — ms';
-  jitterValueElement.textContent = '—';
-  jitterMinElement.textContent = '↓ — ms';
-  jitterMaxElement.textContent = '↑ — ms';
-  packetLossValueElement.textContent = '0.0';
-  bufferbloatSummaryElement.textContent = 'Bufferbloat: —';
-
-
-
-  downloadDataPoints = [];
-  uploadDataPoints = [];
-
-
-  [downloadCanvas, uploadCanvas].forEach(canvas => {
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  });
-
-
-  updateChevronProgress(0);
-};
-
-const setTestExecutionState = isRunning => {
-  startButton.disabled = isRunning;
-  stopButton.disabled = !isRunning;
-  statusPulseDot.className = isRunning ? 'pulse-dot active' : 'pulse-dot';
-};
-
-const startDiagnostics = () => {
-  resetInterfaceState();
-  setTestExecutionState(true);
-  statusPhaseText.textContent = 'Initializing diagnostics';
-
-  speedTestWorker = new Worker('worker.js');
-
-  speedTestWorker.onmessage = event => {
-    const {
-      type,
-      speed,
-      rtt,
-      latency,
-      latencyMin,
-      latencyMax,
-      jitter,
-      jitterMin,
-      jitterMax,
-      packetLoss,
-      bufferbloat,
-      progress,
-      statusText,
-      errorMessage
-    } = event.data;
-
-    if (progress !== undefined) updateChevronProgress(progress);
-    if (statusText) statusPhaseText.textContent = statusText;
-
-    switch (type) {
-      case 'pingUpdate':
-        latencyValueElement.textContent = rtt.toFixed(1);
-        break;
-
-      case 'latencyFinal':
-        latencyValueElement.textContent = latency.toFixed(1);
-        latencyMinElement.textContent = `↓ ${latencyMin.toFixed(1)} ms`;
-        latencyMaxElement.textContent = `↑ ${latencyMax.toFixed(1)} ms`;
-        jitterValueElement.textContent = jitter.toFixed(1);
-        jitterMinElement.textContent = `↓ ${jitterMin.toFixed(1)} ms`;
-        jitterMaxElement.textContent = `↑ ${jitterMax.toFixed(1)} ms`;
-        packetLossValueElement.textContent = packetLoss.toFixed(1);
-
-        break;
-
-      case 'downloadUpdate':
-        downloadSpeedElement.textContent = speed.toFixed(1);
-        downloadDataPoints.push(speed);
-        SpeedSnapCharts.renderThroughputCurve(
-          downloadCanvas,
-          downloadDataPoints,
-          '#f6821f',
-          'rgba(246, 130, 31, 0.28)'
-        );
-        break;
-
-      case 'bufferbloatUpdate':
-        bufferbloatSummaryElement.textContent = `Bufferbloat: ${bufferbloat}`;
-        break;
-
-      case 'uploadUpdate':
-        uploadSpeedElement.textContent = speed.toFixed(1);
-        uploadDataPoints.push(speed);
-        SpeedSnapCharts.renderThroughputCurve(
-          uploadCanvas,
-          uploadDataPoints,
-          '#b877f7',
-          'rgba(184, 119, 247, 0.28)'
-        );
-        break;
-
-      case 'testComplete':
-        setTestExecutionState(false);
-        statusPhaseText.textContent = 'Completed';
-        updateChevronProgress(100);
-
-        speedTestWorker.terminate();
-        speedTestWorker = null;
-        break;
-
-      case 'testError':
-        setTestExecutionState(false);
-        statusPhaseText.textContent = errorMessage || 'Test failed';
-        speedTestWorker.terminate();
-        speedTestWorker = null;
-        break;
     }
   };
-
-  speedTestWorker.onerror = () => {
-    setTestExecutionState(false);
-    statusPhaseText.textContent = 'Worker execution error';
-  };
-
-  speedTestWorker.postMessage('start');
 };
 
-const stopDiagnostics = () => {
-  if (!speedTestWorker) return;
-  speedTestWorker.postMessage('stop');
-  speedTestWorker.terminate();
-  speedTestWorker = null;
-  setTestExecutionState(false);
-  statusPhaseText.textContent = 'Test paused';
+getEl('stopButton').onclick = () => {
+  if (worker) worker.postMessage('stop');
+  getEl('startButton').disabled = false;
+  getEl('stopButton').disabled = true;
+  getEl('statusPulseDot').classList.remove('active');
+  getEl('statusPhaseText').textContent = 'Stopped';
 };
 
-startButton.addEventListener('click', startDiagnostics);
-stopButton.addEventListener('click', stopDiagnostics);
+getEl('aiSuggestButton').onclick = () => {
+  if (latestResult) SpeedSnapAI.openDiagnosis(latestResult);
+  else alert('Please run a speed test first to get AI optimization advice.');
+};
 
-window.addEventListener('resize', () => {
-  if (downloadDataPoints.length) {
-    SpeedSnapCharts.renderThroughputCurve(
-      downloadCanvas,
-      downloadDataPoints,
-      '#f6821f',
-      'rgba(246, 130, 31, 0.28)'
-    );
-  }
-  if (uploadDataPoints.length) {
-    SpeedSnapCharts.renderThroughputCurve(
-      uploadCanvas,
-      uploadDataPoints,
-      '#b877f7',
-      'rgba(184, 119, 247, 0.28)'
-    );
-  }
-});
+const updateNav = () => SpeedSnapDB.getStats().then(s => { const el = getEl('navHistoryCount'); if (el) el.textContent = s.count; });
+updateNav();
