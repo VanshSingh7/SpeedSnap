@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SpeedSnap History — View your past internet speed benchmarks and AI-powered network optimization suggestions">
+    <title>SpeedSnap — Test History & AI Diagnostics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="navbar">
+        <div class="brand">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+          <span class="brand-title">SpeedSnap</span>
+        </div>
+        <nav class="nav-links">
+          <a href="index.html" class="nav-link">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <span>Speed Test</span>
+          </a>
+          <a href="history.html" class="nav-link active">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>History</span>
+            <span id="navHistoryCount" class="nav-count-badge">0</span>
+          </a>
+        </nav>
+      </header>
+
+      <main class="main-content">
+        <div class="history-page-header">
+          <div>
+            <h1>Test History</h1>
+          </div>
+          <button id="globalAiSuggestBtn" class="action-button ai-suggest-btn" title="Analyze latest test with AI">
+            <span>Analyze Latest Test</span>
+          </button>
+        </div>
+
+        <!-- Summary Statistics Row -->
+        <section class="history-stats-grid">
+          <div class="history-stat-card">
+            <span class="stat-card-label">Total Tests</span>
+            <span id="statTotalTests" class="stat-card-number">0</span>
+          </div>
+          <div class="history-stat-card">
+            <span class="stat-card-label">Avg Download</span>
+            <span id="statAvgDownload" class="stat-card-number">—</span>
+          </div>
+          <div class="history-stat-card">
+            <span class="stat-card-label">Avg Upload</span>
+            <span id="statAvgUpload" class="stat-card-number">—</span>
+          </div>
+          <div class="history-stat-card">
+            <span class="stat-card-label">Avg Latency</span>
+            <span id="statAvgLatency" class="stat-card-number">—</span>
+          </div>
+        </section>
+
+        <!-- History Toolbar -->
+        <section class="history-toolbar">
+          <div class="search-box">
+            <input type="text" id="historySearchInput" placeholder="Filter tests..." />
+          </div>
+          <div class="toolbar-actions">
+            <button id="clearAllHistoryBtn" class="action-button danger-action">Clear History</button>
+          </div>
+        </section>
+
+        <!-- Test History Cards List -->
+        <section id="historyListContainer" class="history-list-grid">
+          <!-- Dynamically populated by history.js -->
+        </section>
+
+        <!-- Empty State Container -->
+        <section id="emptyStateContainer" class="history-empty-state">
+          <h3>No Tests Recorded</h3>
+          <p>Run a speed test to see your history here.</p>
+          <a href="index.html" class="action-button primary-action empty-cta-btn">Run Speed Test</a>
+        </section>
+
+        <footer class="app-footer">
+          <div>SpeedSnap · High Precision Browser Speed Test</div>
+        </footer>
+      </main>
+    </div>
+
+    <!-- AI Diagnostic Modal -->
+    <div id="aiModalBackdrop" class="ai-modal-backdrop">
+      <div class="ai-modal-card">
+        <div class="ai-modal-header">
+          <div>
+            <div class="ai-modal-title">Network Suggestions</div>
+            <div class="ai-modal-subtitle">AI analysis based on your test results</div>
+          </div>
+          <div class="ai-modal-actions">
+            <button id="copyAiAdviceBtn" class="ai-action-btn">Copy</button>
+            <button id="closeAiModalBtn" class="ai-close-btn">&times;</button>
+          </div>
+        </div>
+        <div id="aiTelemetryStrip" class="ai-metrics-snapshot"></div>
+        <div id="aiModalContent" class="ai-modal-content"></div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/gemini.js"></script>
+    <script src="js/history.js"></script>
+  </body>
+</html>

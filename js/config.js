@@ -36,5 +36,20 @@ const SPEEDSNAP_CONFIG = {
     gamingGreatJitter: 8,
     videoChatUpload: 5,
     videoChatLatency: 60
+  },
+  ai: {
+    geminiApiKey: '',
+    model: 'gemini-3.1-flash-lite'
   }
 };
+
+// Automatically load Gemini API key from .env file
+if (typeof fetch === 'function') {
+  fetch('.env')
+    .then(res => res.ok ? res.text() : '')
+    .then(text => {
+      const match = text.match(/GEMINI_API_KEY\s*=\s*(.+)/);
+      if (match) SPEEDSNAP_CONFIG.ai.geminiApiKey = match[1].trim();
+    })
+    .catch(() => {});
+}
