@@ -1,71 +1,70 @@
 # SpeedSnap ⚡
 
-> **High-Precision Browser-Native Internet Speed Test & Network Diagnostics with Gemini AI**
-
-SpeedSnap is a modern, client-side network diagnostics dashboard built purely on vanilla web standards. Unlike traditional speed tests that only display peak megabits per second, SpeedSnap analyzes end-to-end network health: loaded latency degradation (**bufferbloat**), packet consistency (**jitter**), **packet loss**, **throughput curves**, real-world application suitability ratings, and **AI-powered diagnostic recommendations** powered by Google Gemini.
-
-Built with **zero external frameworks, zero npm dependencies, and zero backend**. Everything runs natively in the browser.
+SpeedSnap is a simple, browser-based internet speed and network diagnostic tool. It tests your download speed, upload speed, ping, jitter, and bufferbloat in real time, without needing any external software or complex setup.
 
 ---
 
-## 🚀 Key Features
+## 🌟 What SpeedSnap Does & Key Benefits
 
-### 1. High-Precision Network Benchmark Engine
-- **Idle Latency & Jitter**: Multi-probe ping measurement calculating minimum, average, maximum round-trip times (RTT) and Mean Absolute Successive Difference (MASD) jitter.
-- **Bufferbloat Detection**: Measures latency delta ($\Delta \text{ms}$) under concurrent download saturation to detect buffer-induced lag.
-- **Tiered Download Throughput**: Staggered binary payload transfers (500 KB to 20 MB) computing real-time throughput and 90th percentile speeds.
-- **Tiered Upload Throughput**: Generates and transfers `Uint8Array` binary payloads to measure loaded upload capacity.
-- **Packet Loss Detection**: Quantifies dropped probes over sequential network bursts.
-
-### 2. Multi-Threaded Web Worker Architecture
-- Offloads all intensive network requests, timing loops, blob conversions, and statistical calculations into a dedicated background thread (`js/worker.js`).
-- Keeps the browser UI thread running smoothly at a consistent 60 FPS without stutter or dropped frames.
-- Full Start and Stop abort control utilizing `AbortController`.
-
-### 3. Dynamic Visual Progress & Live Canvas Charts
-- **56-Segment Chevron Progress Bar**: Multi-phase color progression visually indicating benchmark milestones:
-  - 🔵 **Blue**: Latency and Jitter calibration
-  - 🟡 **Yellow**: Multi-tier Download saturation
-  - 🟣 **Purple**: Multi-tier Upload saturation
-  - 🔴 **Red**: Packet loss verification
-- **Retina-Ready Spline Curves**: Smooth, auto-scaled throughput canvas graphs with gradient fills and live metric tracking (`js/charts.js`).
-
-### 4. Automated Network Quality Scorecard
-Instant suitability evaluation for real-world bandwidth scenarios based on latency, jitter, and throughput thresholds:
-- 🎬 **Video Streaming**: Great (4K UHD) / Good (1080p) / Fair (720p)
-- 🎮 **Online Gaming**: Great (<35 ms RTT, <8 ms jitter) / Good / Fair
-- 📞 **Video Calls**: Evaluates bi-directional stability for conferencing platforms (Zoom, Teams, Google Meet)
-
-### 5. Gemini AI Diagnostic Assistant
-- Integrates Google's `gemini-3.1-flash-lite` model (`js/gemini.js`) to provide intelligent network engineering advice based on your live benchmark telemetry (throughput, ping, jitter, and bufferbloat).
-- Formats actionable tips with clean headings, readable paragraphs, and highlight badges.
-- One-click clipboard copy for easy diagnostic sharing.
-
-### 6. Offline Local History & Dashboard (IndexedDB)
-- **Zero-Cloud Privacy**: Test history is stored completely on-device in browser `IndexedDB` (`SpeedSnapDB`).
-- **Dedicated History Interface (`history.html`)**:
-  - Live summary statistics: Total Tests, Average Download, Average Upload, and Average Latency.
-  - Interactive search and speed filter.
-  - History counter badge synchronized across both navigation bars.
-  - One-click historical AI diagnosis and test record deletion.
-
-### 7. Modular Architecture
-- Clean separation of concerns designed for easy maintainability, readability, and clarity.
+- **Complete Connection Checks**: Measures download and upload speeds along with idle ping, jitter, and bufferbloat (lag under load).
+- **Flexible Test Toggles**: Easily switch and choose which tests you want to run (latency, download, upload) before starting.
+- **Smooth Performance**: Runs all heavy network tests in the background using Web Workers, so the page and charts stay smooth and responsive.
+- **Local History (IndexedDB)**: Saves your past speed test results directly in your browser using IndexedDB. No accounts, no database to install, and your data stays private on your machine.
+- **AI Suggestions (Gemini API)**: Uses Google Gemini AI to review your network results and suggest simple, practical ways to fix lag, improve gaming, or boost streaming quality.
 
 ---
 
-## 🛠️ Technology Stack
+## 📋 Prerequisites
 
-| Layer | Technology | Details |
-|---|---|---|
-| **Structure** | Semantic HTML5 | Accessible dashboard layout, clean typography, responsive canvas containers |
-| **Styling** | Vanilla CSS3 | Modern dark theme (`#121212`), CSS custom properties, responsive flex/grid layouts |
-| **Concurrency** | Web Worker API (`worker.js`) | Background network benchmarking decoupled from UI rendering |
-| **Data Visualization** | HTML5 Canvas 2D (`charts.js`) | Retina-ready throughput curves with gradient fills |
-| **Persistence** | IndexedDB API (`db.js`) | Client-side persistent storage for historical test benchmarks |
-| **Artificial Intelligence** | Gemini REST API (`gemini.js`) | Automated network engineer recommendations using `gemini-3.1-flash-lite` |
-| **Edge Endpoints** | Cloudflare Edge Network | High-capacity global speed test endpoints (`__down` and `__up`) |
-| **Build Tools** | **None** | Zero dependencies, zero build step, runs natively in any modern browser |
+To run SpeedSnap on your computer, you only need:
+
+1. **A Modern Web Browser**: Google Chrome, Microsoft Edge, Mozilla Firefox, or Brave.
+2. **A Simple Local Server**: Because browsers protect Web Workers, run the project through:
+   - **VS Code with Live Server Extension** (recommended), or
+   - **Python** (if installed on your computer), or
+   - **Node.js** (`npx serve`)
+3. *(Optional)* **Gemini API Key**: If you want AI network suggestions, you can get a free API key from [Google AI Studio](https://aistudio.google.com/) and place it in a `.env` file.
+
+---
+
+## 🚀 How to Run SpeedSnap (Step-by-Step)
+
+### Step 1: Open the Project
+Open the SpeedSnap folder in **Visual Studio Code**.
+
+### Step 2: (Optional) Set up your Gemini API Key
+If you want to use the AI suggestions feature:
+1. Create a file named `.env` in the root folder (if not already there).
+2. Add your key inside:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key_here
+   ```
+
+### Step 3: Start the Application
+
+#### Option A: Using VS Code "Go Live" (Easiest)
+1. Install the **Live Server** extension in VS Code if you don't have it.
+2. Right-click on `index.html` and click **"Open with Live Server"**, or click the **Go Live** button at the bottom right corner of VS Code.
+3. Your browser will automatically open `http://127.0.0.1:5500`.
+
+#### Option B: Using Python
+Open your terminal in the project folder and run:
+```bash
+python -m http.server 8080
+```
+Then open `http://localhost:8080` in your web browser.
+
+#### Option C: Using Node.js
+Open your terminal in the project folder and run:
+```bash
+npx serve .
+```
+
+### Step 4: Run a Test
+1. Click **Start Test** on the main dashboard.
+2. Watch the live speed gauges and canvas charts update in real time.
+3. Once completed, view your quality score (Streaming, Gaming, Calls) or click **AI Suggestion** for personalized tips.
+4. Click **History** in the top navigation to view your saved past tests and stats.
 
 ---
 
@@ -73,63 +72,24 @@ Instant suitability evaluation for real-world bandwidth scenarios based on laten
 
 ```text
 SpeedSnap/
-├── index.html          # Main benchmark dashboard, metrics cards, canvas, control panel
-├── history.html        # Local test history dashboard, summary stats, filter toolbar
+├── index.html       # Main speed test dashboard
+├── history.html     # Past test records and statistics
 ├── css/
-│   └── style.css       # Unified dark theme design system, layout, and modal styles
+│   └── style.css    # Clean dark theme styling
 ├── js/
-│   ├── config.js       # Endpoints, test sizes, threshold constants, Gemini API config
-│   ├── charts.js       # Canvas curve rendering and visual graph routines
-│   ├── db.js           # IndexedDB wrapper for CRUD operations and aggregate statistics
-│   ├── gemini.js       # Gemini AI diagnostic caller, markdown formatter, and modal controller
-│   ├── history.js      # History dashboard controller, filter logic, and UI bindings
-│   ├── script.js       # Main page controller, chevron progress, and worker coordinator
-│   └── worker.js       # Multi-threaded benchmark worker executing network requests
-├── .env                # Local environment configuration for API keys
-├── LICENSE             # MIT License
-└── README.md           # Project documentation and architecture guide
+│   ├── config.js    # Settings and endpoint configurations
+│   ├── worker.js    # Background network benchmark engine
+│   ├── script.js    # Main dashboard UI logic
+│   ├── charts.js    # Live speed and ping canvas charts
+│   ├── db.js        # IndexedDB storage helper
+│   ├── gemini.js    # Gemini AI recommendations helper
+│   └── history.js   # History page logic
+├── .env             # Your local Gemini API key (ignored by git)
+└── README.md        # Documentation
 ```
-
-## 🚦 Getting Started
-
-Because SpeedSnap requires no compiler, build tools, or packages, you can run it immediately:
-
-### Option 1: VS Code "Go Live" Extension (Recommended)
-1. Open the project folder in Visual Studio Code.
-2. Install the **Live Server** extension (by Ritwick Dey) if not already installed.
-3. Right-click on `index.html` and select **"Open with Live Server"** (or click the **"Go Live"** button in the bottom status bar).
-4. SpeedSnap will automatically open in your default browser at `http://127.0.0.1:5500`.
-
-### Option 2: Local Static Server
-Running through any local static server ensures seamless Web Worker and IndexedDB support:
-
-**Using Python:**
-```bash
-python -m http.server 8080
-```
-Open [http://localhost:8080](http://localhost:8080) in your browser.
-
-**Using Node.js:**
-```bash
-npx serve .
-```
-
----
-
-## 🎓 Academic Concepts Demonstrated (CSE Curriculum)
-
-1. **Concurrent Programming & Concurrency**: Multi-threaded execution via Web Workers avoiding UI starvation during I/O operations.
-2. **Client-Side Storage Systems**: Structured schema definition, asynchronous transactions, cursor iteration, and aggregate computations using IndexedDB.
-3. **Computer Networks & Telemetry**:
-   - Round-Trip Time (RTT) measurement.
-   - Mean Absolute Successive Difference (MASD) jitter algorithms.
-   - Bufferbloat (queueing delay under full link saturation).
-   - High-throughput payload chunking and bandwidth calculations.
-4. **Data Visualization**: Computer graphics utilizing HTML5 Canvas 2D spline curves.
-5. **Modern RESTful AI Integration**: Interfacing with LLM endpoints via HTTP POST requests, prompt design, and safe DOM string parsing.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is open source and available under the [MIT License](LICENSE).
