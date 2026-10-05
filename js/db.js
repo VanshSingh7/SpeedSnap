@@ -2,20 +2,31 @@
 const SpeedSnapDB = (() => {
   const DB_NAME = 'SpeedSnapDB';
   const STORE = 'test_history';
+  let dbPromise = null;
 
-  // Open database connection
-  function openDB() {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, 1);
-      req.onupgradeneeded = () => req.result.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
+  // Open database connection with connection reuse caching
+  function getDB() {
+    if (!dbPromise) {
+      dbPromise = new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = () => req.result.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+        req.onsuccess = () => {
+          const db = req.result;
+          db.onversionchange = () => { db.close(); dbPromise = null; };
+          resolve(db);
+        };
+        req.onerror = () => {
+          dbPromise = null;
+          reject(req.error);
+        };
+      });
+    }
+    return dbPromise;
   }
 
   // Save speed test result to IndexedDB
   async function saveResult(data) {
-    const db = await openDB();
+    const db = await getDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE, 'readwrite');
       const req = tx.objectStore(STORE).add({ ...data, timestamp: new Date().toISOString() });
@@ -26,7 +37,7 @@ const SpeedSnapDB = (() => {
 
   // Get all results sorted by latest first
   async function getAllResults() {
-    const db = await openDB();
+    const db = await getDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE, 'readonly');
       const req = tx.objectStore(STORE).getAll();
@@ -37,7 +48,7 @@ const SpeedSnapDB = (() => {
 
   // Delete a result by ID
   async function deleteResult(id) {
-    const db = await openDB();
+    const db = await getDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE, 'readwrite');
       const req = tx.objectStore(STORE).delete(Number(id));
@@ -48,7 +59,7 @@ const SpeedSnapDB = (() => {
 
   // Clear all saved test history
   async function clearAll() {
-    const db = await openDB();
+    const db = await getDB();
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE, 'readwrite');
       const req = tx.objectStore(STORE).clear();
@@ -72,5 +83,6 @@ const SpeedSnapDB = (() => {
     };
   }
 
-  return { openDB, saveResult, getAllResults, deleteResult, clearAll, clearAllResults: clearAll, getStats };
+  return { openDB: getDB, saveResult, getAllResults, deleteResult, clearAll, getStats };
 })();
+

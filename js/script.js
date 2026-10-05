@@ -3,6 +3,16 @@ const getEl = id => document.getElementById(id);
 const TOTAL_CHEVRONS = 56, chevronBar = getEl('chevronProgressBar');
 let worker = null, lastFilled = 0, latestResult = null, downPoints = [], upPoints = [];
 
+// Determine badge style according to test score
+function getBadgeClass(rating) {
+  if (!rating || rating === '—') return 'badge-idle';
+  const r = rating.toLowerCase();
+  if (r.includes('great')) return 'badge-great';
+  if (r.includes('good')) return 'badge-good';
+  if (r.includes('fair')) return 'badge-fair';
+  return 'badge-poor';
+}
+
 // Initialize 56 chevron segments
 if (chevronBar) {
   chevronBar.innerHTML = '';
@@ -28,8 +38,19 @@ function resetUI() {
   if (chevronBar) for (let c of chevronBar.children) c.className = 'chevron-segment';
   ['downloadSpeed', 'uploadSpeed'].forEach(id => getEl(id).textContent = '0.0');
   ['latencyValue', 'jitterValue', 'latencyMin', 'latencyMax', 'jitterMin', 'jitterMax'].forEach(id => getEl(id).textContent = '—');
+  getEl('packetLossValue').textContent = '0.0';
   getEl('bufferbloatSummary').textContent = 'Bufferbloat: —';
-  ['streamingBadge', 'gamingBadge', 'videoChatBadge'].forEach(id => { const el = getEl(id); if (el) { el.textContent = '—'; el.className = 'quality-badge badge-idle'; } });
+  ['downloadCanvas', 'uploadCanvas'].forEach(id => {
+    const cvs = getEl(id);
+    if (cvs) {
+      const ctx = cvs.getContext('2d');
+      if (ctx) ctx.clearRect(0, 0, cvs.width, cvs.height);
+    }
+  });
+  ['streamingBadge', 'gamingBadge', 'videoChatBadge'].forEach(id => {
+    const el = getEl(id);
+    if (el) { el.textContent = '—'; el.className = 'quality-badge badge-idle'; }
+  });
 }
 
 // Start test benchmark
@@ -70,12 +91,24 @@ getEl('startButton').onclick = () => {
       getEl('stopButton').disabled = true;
       getEl('statusPulseDot').classList.remove('active');
       getEl('statusPhaseText').textContent = 'Completed';
+      getEl('packetLossValue').textContent = (d.packetLoss || 0).toFixed(1);
       updateProgress(100);
       latestResult = { downloadSpeed: d.download, uploadSpeed: d.upload, latency: d.latency, jitter: d.jitter, bufferbloat: `+${d.bufferbloat} ms` };
       SpeedSnapDB.saveResult(latestResult).then(updateNav);
       if (d.ratings) {
-        ['streaming', 'gaming', 'videoChat'].forEach(k => { const el = getEl(k + 'Badge'); if (el) { el.textContent = d.ratings[k]; el.className = 'quality-badge badge-great'; } });
+        ['streaming', 'gaming', 'videoChat'].forEach(k => {
+          const el = getEl(k + 'Badge');
+          if (el && d.ratings[k]) {
+            el.textContent = d.ratings[k];
+            el.className = `quality-badge ${getBadgeClass(d.ratings[k])}`;
+          }
+        });
       }
+    } else if (d.type === 'testError') {
+      getEl('startButton').disabled = false;
+      getEl('stopButton').disabled = true;
+      getEl('statusPulseDot').classList.remove('active');
+      getEl('statusPhaseText').textContent = `Error: ${d.errorMessage || 'Test failed'}`;
     }
   };
 };
@@ -94,4 +127,4 @@ getEl('aiSuggestButton').onclick = () => {
 };
 
 const updateNav = () => SpeedSnapDB.getStats().then(s => { const el = getEl('navHistoryCount'); if (el) el.textContent = s.count; });
-updateNav();
+updateNav();

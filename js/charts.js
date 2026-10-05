@@ -1,12 +1,16 @@
-// SpeedSnap - Simple Canvas Chart Module (CSE Sem 5 Project)
+// SpeedSnap - Canvas Chart Module (CSE Sem 5 Project)
 const SpeedSnapCharts = (() => {
-  // Setup canvas resolution
+  // Setup crisp canvas resolution with high DPI support
   function setupCanvas(canvas) {
     const rect = canvas.getBoundingClientRect();
-    const w = rect.width || 300, h = rect.height || 100;
-    canvas.width = w;
-    canvas.height = h;
-    return { ctx: canvas.getContext('2d'), w, h };
+    const dpr = window.devicePixelRatio || 1;
+    const w = rect.width || 300;
+    const h = rect.height || 100;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    return { ctx, w, h };
   }
 
   // Draw smooth speed curve on canvas
@@ -43,41 +47,6 @@ const SpeedSnapCharts = (() => {
     ctx.stroke();
   }
 
-  // Draw simple latency min/median/max box plot
-  function drawLatencyBoxPlot(canvas, samples, color) {
-    if (!canvas || !samples || samples.length === 0) return;
-    const { ctx, w, h } = setupCanvas(canvas);
-    ctx.clearRect(0, 0, w, h);
-
-    const sorted = [...samples].sort((a, b) => a - b);
-    const min = sorted[0];
-    const max = Math.max(sorted[sorted.length - 1], min + 1);
-    const mid = sorted[Math.floor(sorted.length / 2)];
-
-    const scale = (val) => 15 + ((val - min) / (max - min || 1)) * (w - 30);
-    const y = h / 2;
-
-    // Range line (min to max)
-    ctx.beginPath();
-    ctx.moveTo(scale(min), y);
-    ctx.lineTo(scale(max), y);
-    ctx.strokeStyle = '#444';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Median marker
-    ctx.beginPath();
-    ctx.arc(scale(mid), y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = color || '#38bdf8';
-    ctx.fill();
-  }
-
-  // Draw packet loss indicator bar
-  function drawLossBar(container, textElement, lossPercent) {
-    if (textElement) textElement.textContent = lossPercent.toFixed(1) + '%';
-    if (!container) return;
-    container.innerHTML = `<div style="height:100%;width:${Math.max(4, Math.min(100, lossPercent))}%;background:${lossPercent > 0 ? '#f87171' : '#4ade80'};border-radius:3px;"></div>`;
-  }
-
-  return { drawSpeedChart, drawLatencyBoxPlot, drawLossBar };
+  return { drawSpeedChart };
 })();
+

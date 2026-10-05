@@ -84,8 +84,14 @@
 
         <!-- Empty State Container -->
         <section id="emptyStateContainer" class="history-empty-state">
+          <div class="empty-icon-box">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.75">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
           <h3>No Tests Recorded</h3>
-          <p>Run a speed test to see your history here.</p>
+          <p>Run a speed test to benchmark your network and view historical performance here.</p>
           <a href="index.html" class="action-button primary-action empty-cta-btn">Run Speed Test</a>
         </section>
 
@@ -104,8 +110,25 @@
             <div class="ai-modal-subtitle">AI analysis based on your test results</div>
           </div>
           <div class="ai-modal-actions">
+            <button id="configAiKeyBtn" class="ai-action-btn" title="API Key Settings">⚙️ Key</button>
             <button id="copyAiAdviceBtn" class="ai-action-btn">Copy</button>
             <button id="closeAiModalBtn" class="ai-close-btn">&times;</button>
+          </div>
+        </div>
+        <div id="aiKeyConfigBar" class="ai-key-config-bar" style="display: none;">
+          <div class="ai-key-config-row">
+            <input type="password" id="geminiApiKeyInput" class="ai-key-input" placeholder="Paste your Gemini API key (AIzaSy...)" autocomplete="off" />
+            <select id="geminiModelSelect" class="ai-model-select" title="Gemini Model">
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+              <option value="gemini-3.1-flash-lite" selected>Gemini 3.1 Flash-Lite</option>
+              <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+            </select>
+            <button id="saveAiKeyBtn" class="action-button primary-action" style="padding:6px 14px;font-size:0.8rem;">Save</button>
+          </div>
+          <div class="ai-key-hint">
+            <span>Saved in your browser localStorage.</span>
+            <span>·</span>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Get free API key &rarr;</a>
           </div>
         </div>
         <div id="aiTelemetryStrip" class="ai-metrics-snapshot"></div>
