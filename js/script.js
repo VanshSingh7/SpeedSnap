@@ -1,4 +1,4 @@
-// SpeedSnap - Main Controller (CSE Sem 5 Project)
+// SpeedSnap - Main Controller
 const getEl = id => document.getElementById(id);
 const TOTAL_CHEVRONS = 56, chevronBar = getEl('chevronProgressBar');
 let worker = null, lastFilled = 0, latestResult = null, downPoints = [], upPoints = [];
@@ -127,4 +127,4 @@ getEl('aiSuggestButton').onclick = () => {
 };
 
 const updateNav = () => SpeedSnapDB.getStats().then(s => { const el = getEl('navHistoryCount'); if (el) el.textContent = s.count; });
-updateNav();
+updateNav();

@@ -1,4 +1,4 @@
-// SpeedSnap - History Page Controller (CSE Sem 5 Project)
+// SpeedSnap - History Page Controller
 document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('historyListContainer');
   const emptyState = document.getElementById('emptyStateContainer');

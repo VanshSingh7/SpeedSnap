@@ -1,4 +1,4 @@
-// SpeedSnap - Canvas Chart Module (CSE Sem 5 Project)
+// SpeedSnap - Canvas Chart Module
 const SpeedSnapCharts = (() => {
   // Setup crisp canvas resolution with high DPI support
   function setupCanvas(canvas) {

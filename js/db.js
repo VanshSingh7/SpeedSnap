@@ -1,4 +1,4 @@
-// SpeedSnap - IndexedDB Storage Module (CSE Sem 5 Project)
+// SpeedSnap - IndexedDB Storage Module
 const SpeedSnapDB = (() => {
   const DB_NAME = 'SpeedSnapDB';
   const STORE = 'test_history';

@@ -1,4 +1,4 @@
-// SpeedSnap - Benchmark Worker (CSE Sem 5 Project)
+// SpeedSnap - Benchmark Worker
 importScripts('config.js');
 let abortController = null;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));

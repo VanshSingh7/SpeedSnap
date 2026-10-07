@@ -1,94 +1,51 @@
-// Configuration and endpoints for speed test
+// SpeedSnap - Configuration
 const SPEEDSNAP_CONFIG = {
   endpoints: {
     download: 'https://speed.cloudflare.com/__down',
     upload: 'https://speed.cloudflare.com/__up'
   },
-  latency: {
-    probeCount: 6,
-    probeIntervalMs: 40,
-    bufferbloatProbeCount: 4,
-    bufferbloatIntervalMs: 30
-  },
+  latency: { probeCount: 6, probeIntervalMs: 40, bufferbloatProbeCount: 4, bufferbloatIntervalMs: 30 },
   downloadTests: [
-    { bytes: 1_000_000, label: '1 MB' },
-    { bytes: 3_000_000, label: '3 MB' },
-    { bytes: 7_000_000, label: '7 MB' }
+    { bytes: 1e6, label: '1 MB' },
+    { bytes: 5e6, label: '5 MB' },
+    { bytes: 10e6, label: '10 MB' },
+    { bytes: 25e6, label: '25 MB' },
+    { bytes: 50e6, label: '50 MB' }
   ],
   uploadTests: [
-    { bytes: 500_000, label: '500 KB' },
-    { bytes: 2_000_000, label: '2 MB' },
-    { bytes: 5_000_000, label: '5 MB' }
+    { bytes: 1e6, label: '1 MB' },
+    { bytes: 5e6, label: '5 MB' },
+    { bytes: 10e6, label: '10 MB' },
+    { bytes: 20e6, label: '20 MB' },
+    { bytes: 35e6, label: '35 MB' }
   ],
   thresholds: {
-    streaming4K: 25,
-    streaming1080p: 10,
-    gamingGreatLatency: 35,
-    gamingGoodLatency: 75,
-    gamingGreatJitter: 8,
-    videoChatUpload: 5,
-    videoChatLatency: 60
+    streaming4K: 25, streaming1080p: 10,
+    gamingGreatLatency: 35, gamingGoodLatency: 75, gamingGreatJitter: 8,
+    videoChatUpload: 5, videoChatLatency: 60
   },
-  ai: {
-    geminiApiKey: '',
-    model: 'gemini-3.1-flash-lite'
-  },
-  async getApiKey() {
-    // 1. Check user key stored in browser localStorage
+  ai: { model: 'gemini-3.1-flash-lite' },
+
+  // Read API key: 1. Vercel Serverless Function, 2. Local .env file
+  async getEnvKey() {
+    // 1. Production / Vercel Serverless Function (reads Vercel Dashboard env variable)
     try {
-      const localKey = localStorage.getItem('speedsnap_gemini_api_key');
-      if (localKey && localKey.trim()) {
-        this.ai.geminiApiKey = localKey.trim();
-        return this.ai.geminiApiKey;
+      const res = await fetch('/api/key');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.apiKey && data.apiKey.trim()) return data.apiKey.trim();
       }
     } catch (_) {}
 
-    // 2. Return in-memory key if already set
-    if (this.ai.geminiApiKey) return this.ai.geminiApiKey;
+    // 2. Local Development (.env file if served over HTTP)
+    try {
+      const res = await fetch('.env');
+      if (res.ok) {
+        const match = (await res.text()).match(/GEMINI_API_KEY\s*=\s*(.+)/);
+        if (match && match[1].trim()) return match[1].trim();
+      }
+    } catch (_) {}
 
-    // 3. Fallback: try fetching .env if accessible via HTTP server
-    if (typeof fetch === 'function') {
-      try {
-        const res = await fetch('.env');
-        if (res.ok) {
-          const text = await res.text();
-          const match = text.match(/GEMINI_API_KEY\s*=\s*(.+)/);
-          if (match && match[1].trim()) {
-            this.ai.geminiApiKey = match[1].trim();
-            return this.ai.geminiApiKey;
-          }
-        }
-      } catch (_) {}
-    }
     return '';
-  },
-  setApiKey(key) {
-    this.ai.geminiApiKey = (key || '').trim();
-    try {
-      if (this.ai.geminiApiKey) {
-        localStorage.setItem('speedsnap_gemini_api_key', this.ai.geminiApiKey);
-      } else {
-        localStorage.removeItem('speedsnap_gemini_api_key');
-      }
-    } catch (_) {}
-  },
-  setModel(model) {
-    if (model) {
-      this.ai.model = model;
-      try {
-        localStorage.setItem('speedsnap_gemini_model', model);
-      } catch (_) {}
-    }
   }
 };
-
-// Pre-load Gemini configuration in window context
-if (typeof window !== 'undefined') {
-  try {
-    const savedModel = localStorage.getItem('speedsnap_gemini_model');
-    if (savedModel) SPEEDSNAP_CONFIG.ai.model = savedModel;
-  } catch (_) {}
-  SPEEDSNAP_CONFIG.getApiKey().catch(() => {});
-}
-
-
