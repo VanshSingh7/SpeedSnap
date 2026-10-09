@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/theme.js"></script>
   </head>
   <body>
     <div class="app-container">
@@ -19,22 +20,25 @@
           </svg>
           <span class="brand-title">SpeedSnap</span>
         </div>
-        <nav class="nav-links">
-          <a href="index.html" class="nav-link active">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
-            <span>Speed Test</span>
-          </a>
-          <a href="history.html" class="nav-link">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            <span>History</span>
-            <span id="navHistoryCount" class="nav-count-badge">0</span>
-          </a>
-        </nav>
+        <div class="nav-right">
+          <nav class="nav-links">
+            <a href="index.html" class="nav-link active">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+              <span>Speed Test</span>
+            </a>
+            <a href="history.html" class="nav-link">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span>History</span>
+              <span id="navHistoryCount" class="nav-count-badge">0</span>
+            </a>
+          </nav>
+          <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle Theme" title="Toggle Theme"></button>
+        </div>
       </header>
 
       <main class="main-content">
@@ -132,12 +136,8 @@
               <span id="statusPhaseText">Ready to start</span>
             </div>
           </div>
-          <div id="chevronProgressBar" class="chevron-progress-bar"></div>
-          <div class="chevron-legend">
-            <span class="legend-item"><span class="legend-dot dot-blue"></span> Latency</span>
-            <span class="legend-item"><span class="legend-dot dot-yellow"></span> Download</span>
-            <span class="legend-item"><span class="legend-dot dot-purple"></span> Upload</span>
-            <span class="legend-item"><span class="legend-dot dot-red"></span> Packet Loss</span>
+          <div class="test-progress-bar">
+            <div id="progressBar" class="progress-fill"></div>
           </div>
         </section>
 
@@ -162,7 +162,7 @@
         </section>
 
         <footer class="app-footer">
-          <div>SpeedSnap · High Precision Browser Speed Test</div>
+          <div>SpeedSnap · Check Your Speed, Latency & Connection Stability</div>
         </footer>
       </main>
     </div>

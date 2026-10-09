@@ -1,7 +1,7 @@
 // SpeedSnap - Main Controller
 const getEl = id => document.getElementById(id);
-const TOTAL_CHEVRONS = 56, chevronBar = getEl('chevronProgressBar');
-let worker = null, lastFilled = 0, latestResult = null, downPoints = [], upPoints = [];
+const progressBar = getEl('progressBar');
+let worker = null, latestResult = null, downPoints = [], upPoints = [];
 
 // Determine badge style according to test score
 function getBadgeClass(rating) {
@@ -13,29 +13,15 @@ function getBadgeClass(rating) {
   return 'badge-poor';
 }
 
-// Initialize 56 chevron segments
-if (chevronBar) {
-  chevronBar.innerHTML = '';
-  for (let i = 0; i < TOTAL_CHEVRONS; i++) {
-    const s = document.createElement('div');
-    s.className = 'chevron-segment';
-    chevronBar.appendChild(s);
-  }
-}
-
-// Update colored chevron progress bar
-function updateProgress(pct, phase = 'latency') {
-  if (!chevronBar) return;
-  const target = Math.min(TOTAL_CHEVRONS, Math.round((pct / 100) * TOTAL_CHEVRONS));
-  const color = phase === 'download' ? 'segment-yellow' : phase === 'upload' ? 'segment-purple' : phase === 'loss' ? 'segment-red' : 'segment-blue';
-  for (let i = lastFilled; i < target; i++) if (chevronBar.children[i]) chevronBar.children[i].className = `chevron-segment ${color}`;
-  if (target > lastFilled) lastFilled = target;
+// Update linear progress bar
+function updateProgress(pct) {
+  if (progressBar) progressBar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
 }
 
 // Reset metric displays and charts
 function resetUI() {
-  lastFilled = 0; downPoints = []; upPoints = [];
-  if (chevronBar) for (let c of chevronBar.children) c.className = 'chevron-segment';
+  downPoints = []; upPoints = [];
+  if (progressBar) progressBar.style.width = '0%';
   ['downloadSpeed', 'uploadSpeed'].forEach(id => getEl(id).textContent = '0.0');
   ['latencyValue', 'jitterValue', 'latencyMin', 'latencyMax', 'jitterMin', 'jitterMax'].forEach(id => getEl(id).textContent = '—');
   getEl('packetLossValue').textContent = '0.0';

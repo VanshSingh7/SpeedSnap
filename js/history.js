@@ -2,11 +2,19 @@
 document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('historyListContainer');
   const emptyState = document.getElementById('emptyStateContainer');
-  const searchInput = document.getElementById('historySearchInput');
+  const sortSelect = document.getElementById('historySortSelect');
   const clearAllBtn = document.getElementById('clearAllHistoryBtn');
   const globalAiBtn = document.getElementById('globalAiSuggestBtn');
 
   let allRecords = [];
+
+  function sortRecords(records, sortBy = 'newest') {
+    const list = [...records];
+    if (sortBy === 'download') return list.sort((a, b) => (b.downloadSpeed || 0) - (a.downloadSpeed || 0));
+    if (sortBy === 'upload') return list.sort((a, b) => (b.uploadSpeed || 0) - (a.uploadSpeed || 0));
+    if (sortBy === 'latency') return list.sort((a, b) => (a.latency || 9999) - (b.latency || 9999));
+    return list.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+  }
 
   // Update summary stats cards
   async function updateStats() {
@@ -58,7 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load and refresh history data
   async function loadHistory() {
     allRecords = await SpeedSnapDB.getAllResults();
-    renderList(allRecords);
+    const sortBy = sortSelect ? sortSelect.value : 'newest';
+    renderList(sortRecords(allRecords, sortBy));
     updateStats();
   }
 
@@ -76,10 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  if (searchInput) {
-    searchInput.oninput = () => {
-      const q = searchInput.value.toLowerCase();
-      renderList(allRecords.filter(r => (r.downloadSpeed + ' ' + r.uploadSpeed + ' ' + r.timestamp).toLowerCase().includes(q)));
+  if (sortSelect) {
+    sortSelect.onchange = () => {
+      renderList(sortRecords(allRecords, sortSelect.value));
     };
   }
 
